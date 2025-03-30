@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ReviewSeeder::class,
             OrderSeeder::class,
-            ProductColorSize::class,
+            ProductColorSizeSeeder::class,
             CartSeeder::class,
             OrderItemSeeder::class,
         ]);

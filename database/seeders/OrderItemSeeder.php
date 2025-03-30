@@ -16,14 +16,14 @@ class OrderItemSeeder extends Seeder
         OrderItem::create([
             'total' => 7600,
             'quantity' => 4,
-            'user_id' => 1,
+            'order_id' => 1,
             'product_color_size_id' => 1,
         ]);
 
         OrderItem::create([
             'total' => 10000,
             'quantity' => 5,
-            'user_id' => 2,
+            'order_id' => 2,
             'product_color_size_id' => 2,
         ]);
     }
