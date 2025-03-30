@@ -41,7 +41,7 @@ class AuthController extends Controller
     // Авторизация
     public function login(Request $request) {
         if (!Auth::attempt($request->only('email', 'password'))) {
-            throw new ApiException("Неверная почта или пароль", 401);
+            throw new ApiException("Неверная почта _или пароль", 401);
         }
         // Получение текущего пользователя
         $user = Auth::user();
