@@ -24,7 +24,9 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         // Создаем нового пользователя
-        $user = User::create([... $validated, 'role_id' => $role_id]);
+        $user = User::create([
+            ...$validated,
+            'role_id' => $role_id]);
 
         // Создание токена для пользователя
         $user->api_token = Hash::make(Str::random(60));
@@ -38,8 +40,8 @@ class AuthController extends Controller
     }
     // Авторизация
     public function login(Request $request) {
-        if (!Auth::attempt($request->only('login', 'password'))) {
-            throw new ApiException("Неверный логин и/или пароль", 401);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw new ApiException("Неверная почта или пароль", 401);
         }
         // Получение текущего пользователя
         $user = Auth::user();

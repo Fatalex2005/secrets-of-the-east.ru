@@ -15,9 +15,9 @@ class RegisterRequest extends ApiRequest
     {
         return [
             'name' => 'required|string|max:64|min:3',
-            'surname' => 'required|string|max:64|min:3',
-            'patronymic' => 'nullable|string|max:64|min:3',
-            'login' => 'required|string|max:64|unique:users,login,',
+            'email' => 'required|string|max:64|min:3|unique:users,email,',
+            'telephone' => 'nullable|string|max:25|min:10',
+            'sex' => 'required|boolean',
             'password' => 'required|string|max:64|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'
         ];
     }
@@ -27,16 +27,15 @@ class RegisterRequest extends ApiRequest
             'name.max' => 'Поле "Имя" не должно превышать 64 символа.',
             'name.min' => 'Поле "Имя" не должно быть меньше 3 символов.',
 
-            'surname.required' => 'Поле "Фамилия" обязательно для заполнения.',
-            'surname.max' => 'Поле "Фамилия" не должно превышать 64 символа.',
-            'surname.min' => 'Поле "Фамилия" не должно быть меньше 3 символов.',
+            'email.required' => 'Поле "Email" обязательно для заполнения.',
+            'email.max' => 'Поле "Email" не должно превышать 64 символа.',
+            'email.min' => 'Поле "Email" не должно быть меньше 3 символов.',
+            'email.unique' => 'Пользователь с вашей почтой уже зарегистрирован',
 
-            'patronymic.max' => 'Поле "Отчество" не должно превышать 64 символа.',
-            'patronymic.min' => 'Поле "Отчество" не должно быть меньше 3 символов.',
+            'telephone.max' => 'Поле "Телефон" не должно превышать 64 символа.',
+            'telephone.min' => 'Поле "Телефон" не должно быть меньше 3 символов.',
 
-            'login.required' => 'Поле "Логин" обязательно для заполнения.',
-            'login.max' => 'Поле "Логин" не должно превышать 64 символа.',
-            'login.unique' => 'Такой "Логин" уже существует.',
+            'sex.required' => 'Поле "Пол" обязательно для заполнения.',
 
             'password.required' => 'Поле "Пароль" обязательно для заполнения.',
             'password.max' => 'Поле "Пароль" не должно превышать 64 символа.',
