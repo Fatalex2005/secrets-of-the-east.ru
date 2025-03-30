@@ -22,5 +22,14 @@ class UserSeeder extends Seeder
             'api_token' => null,
             'role_id' => 1,
         ]);
+        User::create([
+            'name' => 'Алексей Петрович',
+            'email' => 'ruginpetr@mail.ru',
+            'telephone' => '88005553536',
+            'sex' => 1,
+            'password' => 'Password123@',
+            'api_token' => null,
+            'role_id' => 1,
+        ]);
     }
 }
