@@ -61,7 +61,7 @@ class ProductController
         }
         return response()->json($product, 201);
     }
-    // Метод для просмотра конкретных бонусов
+    // Метод для просмотра конкретного товара
     public function show($id)
     {
         $product = Product::with('color')->find($id);
