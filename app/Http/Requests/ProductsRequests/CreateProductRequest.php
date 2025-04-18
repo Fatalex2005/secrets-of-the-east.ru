@@ -14,14 +14,18 @@ class CreateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photo' => 'nullable|text',
+            'photo' => 'nullable|file|image|max:2048',
             'name' => 'required|string|max:255',
-            'description' => 'required|text',
+            'description' => 'required|string',
             'sex' => 'required|boolean',
-            'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
             'category_id' => 'required|integer|exists:categories,id',
             'country_id' => 'required|integer|exists:countries,id',
+            'colors' => 'required|array',
+            'colors.*.color_id' => 'required|exists:colors,id',
+            'colors.*.sizes' => 'required|array',
+            'colors.*.sizes.*.size_id' => 'required|exists:sizes,id',
+            'colors.*.sizes.*.quantity' => 'required|integer|min:0',
         ];
     }
     public function messages(): array{
@@ -32,9 +36,6 @@ class CreateProductRequest extends FormRequest
             'description.required' => 'Поле "Название" обязательно для заполнения.',
 
             'sex.required' => 'Поле "Название" обязательно для заполнения.',
-
-            'quantity.required' => 'Поле "Название" обязательно для заполнения.',
-            'quantity.min' => 'Поле "Количество" не должно быть ниже 0.',
 
             'price.required' => 'Поле "Цена" обязательно для заполнения.',
             'price.min' => 'Поле "Цена" не должно быть ниже 0.',

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class AuthController extends Controller
+class AuthController
 {
     // Регистрация пользователя
     public function register(RegisterRequest $request)
