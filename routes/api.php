@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -18,3 +19,10 @@ Route::post('/product', [ProductController::class, 'store'])->middleware('auth:a
 Route::get('/product/{id}', [ProductController::class, 'show']);
 Route::patch('/product/{id}', [ProductController::class, 'update'])->middleware('auth:api');
 Route::delete('/product/{id}', [ProductController::class, 'destroy'])->middleware('auth:api');
+
+// Профиль
+Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api');
+Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth:api');
+Route::delete('/profile', [ProfileController::class, 'destroy'])->middleware('auth:api');
+
+
