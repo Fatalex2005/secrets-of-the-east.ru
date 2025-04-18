@@ -29,6 +29,11 @@ class ProfileController
     {
         $user = Auth::user();
 
+        // Извлекаем валидированные данные
+        $validated = $request->validated();
+
+        $user->update($validated);
+
         return response()->json([
             'message' => 'Профиль успешно обновлен',
             'data' => $user->fresh()->load('role')
