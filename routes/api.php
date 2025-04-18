@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\ViewFilterController;
+use App\Http\Controllers\ReviewController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -34,5 +35,10 @@ Route::get('/category/{categoryId}/country/{countryId}', [FilterController::clas
 // Вывод категорий и стран
 Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
 Route::get('/category', [ViewFilterController::class, 'allCategoryIndex']);
+
+// Отзывы
+Route::get('/product/{id}/review', [ReviewController::class, 'index']);
+Route::post('/product/{id}/review', [ReviewController::class, 'store'])->middleware('auth:api');
+Route::delete('/product/{productId}/review/{reviewId}', [ReviewController::class, 'destroy'])->middleware('auth:api');
 
 
