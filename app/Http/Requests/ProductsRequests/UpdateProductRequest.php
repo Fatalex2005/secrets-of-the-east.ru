@@ -14,21 +14,23 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photo' => 'nullable|text',
+            'photo' => 'nullable|file|image|max:2048',
             'name' => 'string|max:255',
-            'description' => 'text',
+            'description' => 'string',
             'sex' => 'boolean',
-            'quantity' => 'integer|min:0',
             'price' => 'numeric|min:0',
             'category_id' => 'integer|exists:categories,id',
             'country_id' => 'integer|exists:countries,id',
+            'colors' => 'nullable|array',
+            'colors.*.color_id' => 'nullable|integer|exists:colors,id',
+            'colors.*.sizes' => 'nullable|array',
+            'colors.*.sizes.*.size_id' => 'nullable|integer|exists:sizes,id',
+            'colors.*.sizes.*.quantity' => 'nullable|integer|min:0',
         ];
     }
     public function messages(): array{
         return [
             'name.max' => 'Поле "Название" не должно превышать 255 символов.',
-
-            'quantity.min' => 'Поле "Количество" не должно быть ниже 0.',
 
             'price.min' => 'Поле "Цена" не должно быть ниже 0.',
 

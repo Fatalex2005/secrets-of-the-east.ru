@@ -14,7 +14,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api'
 
 // Товары
 Route::get('/product', [ProductController::class, 'index']);
-Route::post('/product', [ProductController::class, 'store']);
+Route::post('/product', [ProductController::class, 'store'])->middleware('auth:api');
 Route::get('/product/{id}', [ProductController::class, 'show']);
-Route::patch('/product/{id}', [ProductController::class, 'update']);
-Route::delete('/product/{id}', [ProductController::class, 'destroy']);
+Route::patch('/product/{id}', [ProductController::class, 'update'])->middleware('auth:api');
+Route::delete('/product/{id}', [ProductController::class, 'destroy'])->middleware('auth:api');
