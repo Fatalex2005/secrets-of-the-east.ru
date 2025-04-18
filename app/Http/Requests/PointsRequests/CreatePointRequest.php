@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\PointsRequests;
 
+use App\Http\Requests\ApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreatePointRequest extends FormRequest
+class CreatePointRequest extends ApiRequest
 {
     public function authorize(): bool
     {

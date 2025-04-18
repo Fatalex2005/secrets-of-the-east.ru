@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\ReviewsRequests;
 
+use App\Http\Requests\ApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateReviewRequest extends FormRequest
+class UpdateReviewRequest extends ApiRequest
 {
     public function authorize(): bool
     {

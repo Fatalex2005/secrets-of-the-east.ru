@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FilterController;
+use App\Http\Controllers\ViewFilterController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -23,6 +25,14 @@ Route::delete('/product/{id}', [ProductController::class, 'destroy'])->middlewar
 // Профиль
 Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api');
 Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth:api');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->middleware('auth:api');
+
+// Товары по фильтрам
+Route::get('/country/{id}', [FilterController::class, 'countryIndex']);
+Route::get('/category/{id}', [FilterController::class, 'categoryIndex']);
+Route::get('/category/{categoryId}/country/{countryId}', [FilterController::class, 'categoryAndCountryIndex']);
+
+// Вывод категорий и стран
+Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
+Route::get('/category', [ViewFilterController::class, 'allCategoryIndex']);
 
 

@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\ProfileRequests;
 
+use App\Http\Requests\ApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProfileRequest extends FormRequest
+class UpdateProfileRequest extends ApiRequest
 {
     public function authorize(): bool
     {

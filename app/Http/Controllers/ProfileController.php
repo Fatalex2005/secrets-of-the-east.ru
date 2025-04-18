@@ -39,20 +39,4 @@ class ProfileController
             'data' => $user->fresh()->load('role')
         ]);
     }
-    // Удаление профиля
-    public function destroy()
-    {
-        $user = Auth::user();
-
-        // Выход пользователя из системы
-        auth()->logout();
-
-        // Удаление пользователя
-        $user->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Профиль успешно удален'
-        ]);
-    }
 }
