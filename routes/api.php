@@ -28,9 +28,7 @@ Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api
 Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth:api');
 
 // Товары по фильтрам
-Route::get('/country/{id}', [FilterController::class, 'countryIndex']);
-Route::get('/category/{id}', [FilterController::class, 'categoryIndex']);
-Route::get('/category/{categoryId}/country/{countryId}', [FilterController::class, 'categoryAndCountryIndex']);
+Route::get('/products/filter', [FilterController::class, 'filterProducts']);
 
 // Вывод категорий и стран
 Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
