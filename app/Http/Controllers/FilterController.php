@@ -62,4 +62,32 @@ class FilterController
             'data' => $products
         ]);
     }
+    // Поиск товаров по названию или описанию
+    public function search(Request $request)
+    {
+        $request->validate([
+            'q' => 'required|string|max:255',
+        ]);
+
+        $search = $request->input('q');
+
+        $products = Product::with(['category', 'country'])
+            ->where('name', 'like', "%{$search}%")
+            ->orWhere('description', 'like', "%{$search}%")
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ничего не найдено по запросу: ' . $search,
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'query' => $search,
+            'count' => $products->count(),
+            'data' => $products,
+        ]);
+    }
 }

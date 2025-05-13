@@ -29,6 +29,7 @@ Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth
 
 // Товары по фильтрам
 Route::get('/products/filter', [FilterController::class, 'filterProducts']);
+Route::get('/products/search', [FilterController::class, 'search']);
 
 // Вывод категорий и стран
 Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
