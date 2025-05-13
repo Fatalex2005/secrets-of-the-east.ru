@@ -14,6 +14,6 @@ class Cart extends Model
     }
     public function productColorSize()
     {
-        return $this->belongsTo(Status::class);
+        return $this->belongsTo(ProductColorSize::class);
     }
 }

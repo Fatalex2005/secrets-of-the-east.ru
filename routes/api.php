@@ -9,6 +9,7 @@ use App\Http\Controllers\FilterController;
 use App\Http\Controllers\ViewFilterController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PointController;
+use App\Http\Controllers\СartController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -46,5 +47,12 @@ Route::get('/point', [PointController::class, 'index']);
 Route::post('/point', [PointController::class, 'store'])->middleware('auth:api');
 Route::patch('/point/{id}', [PointController::class, 'update'])->middleware('auth:api');
 Route::delete('/point/{id}', [PointController::class, 'destroy'])->middleware('auth:api');
+
+// Корзина
+Route::get('/cart', [СartController::class, 'show'])->middleware('auth:api');
+Route::post('/cart/product/{productColorSizeId}', [СartController::class, 'addProduct'])->middleware('auth:api');
+Route::put('/cart/product/{productId}', [СartController::class, 'updateProduct']);
+Route::delete('/cart/product/{productId}', [СartController::class, 'removeProduct']);
+Route::put('/cart', [СartController::class, 'update']);
 
 
