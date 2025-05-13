@@ -16,10 +16,10 @@ class UpdateProfileRequest extends ApiRequest
     {
         return [
             'name' => 'string|max:64|min:3',
-            'email' => 'string|max:64|min:3|unique:users,email,',
+            'email' => 'string|max:64|min:3|unique:users,email,' . $this->user()->id,
             'telephone' => 'string|max:25|min:10',
             'sex' => 'boolean',
-            'password' => 'string|max:64|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'
+            'password' => 'string|max:64|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
         ];
     }
     public function messages(): array{
