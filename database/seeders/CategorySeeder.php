@@ -13,16 +13,15 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::create([
-            'name' => 'Шапка',
-        ]);
-
-        Category::create([
-            'name' => 'Худи',
-        ]);
-
-        Category::create([
-            'name' => 'Штаны',
-        ]);
+        Category::create(['name' => 'Верхняя одежда']);       // Пальто, пуховики, куртки
+        Category::create(['name' => 'Свитшоты и худи']);     // Худи, оверсайз, с принтами
+        Category::create(['name' => 'Футболки и топы']);     // Базовые, принтованные, поло
+        Category::create(['name' => 'Рубашки и блузы']);     // Офисные, повседневные, шелковые
+        Category::create(['name' => 'Джинсы и брюки']);     // Скинни, клеш, карго, классика
+        Category::create(['name' => 'Юбки и платья']);       // Миди, макси, плиссе, коктейльные
+        Category::create(['name' => 'Спортивная одежда']);   // Леггинсы, спортивные костюмы
+        Category::create(['name' => 'Аксессуары']);          // Шапки, шарфы, перчатки, ремни
+        Category::create(['name' => 'Бельё и пижамы']);      // Комплекты, халаты, домашняя одежда
+        Category::create(['name' => 'Купальники и пляжная одежда']); // Боди, парео, плавки
     }
 }

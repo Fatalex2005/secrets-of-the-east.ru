@@ -3,36 +3,27 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Product::create([
-            'photo' => null,
-            'name' => 'Хорошая шапка',
-            'description' => 'Очень тёплая шапочка на новый год',
-            'sex' => 1,
-            'quantity' => 8,
-            'price' => '2400',
-            'category_id' => 1,
-            'country_id' => 1,
-        ]);
+        $categories = [1 => 'Шапка', 2 => 'Худи', 3 => 'Штаны'];
 
-        Product::create([
-            'photo' => null,
-            'name' => 'Хорошее худи',
-            'description' => 'Очень тёплое худи на новый год',
-            'sex' => 1,
-            'quantity' => 10,
-            'price' => '2400',
-            'category_id' => 2,
-            'country_id' => 2,
-        ]);
+        for ($i = 1; $i <= 60; $i++) {
+            $categoryId = rand(1, 3);
+
+            Product::create([
+                'photo' => url('storage/products/girl1.jpg'),
+                'name' => $categories[$categoryId] . ' ' . $i,
+                'description' => 'Описание товара',
+                'sex' => rand(0, 1),
+                'quantity' => rand(5, 15),
+                'price' => rand(1000, 5000),
+                'category_id' => $categoryId,
+                'country_id' => rand(1, 3),
+            ]);
+        }
     }
 }
