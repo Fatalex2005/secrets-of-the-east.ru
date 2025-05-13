@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\ViewFilterController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\PointController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -39,5 +40,11 @@ Route::get('/category', [ViewFilterController::class, 'allCategoryIndex']);
 Route::get('/product/{id}/review', [ReviewController::class, 'index']);
 Route::post('/product/{id}/review', [ReviewController::class, 'store'])->middleware('auth:api');
 Route::delete('/product/{productId}/review/{reviewId}', [ReviewController::class, 'destroy'])->middleware('auth:api');
+
+// Пункты выдачи
+Route::get('/point', [PointController::class, 'index']);
+Route::post('/point', [PointController::class, 'store'])->middleware('auth:api');
+Route::patch('/point/{id}', [PointController::class, 'update'])->middleware('auth:api');
+Route::delete('/point/{id}', [PointController::class, 'destroy'])->middleware('auth:api');
 
 
