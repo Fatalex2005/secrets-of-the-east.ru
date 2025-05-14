@@ -20,7 +20,6 @@ class Order extends Model
     {
         return $this->belongsTo(Point::class);
     }
-
     public function orderItems(){
         return $this->hasMany(OrderItem::class);
     }

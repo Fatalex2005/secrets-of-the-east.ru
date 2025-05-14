@@ -24,5 +24,8 @@ class StatusSeeder extends Seeder
         Status::create([
             'name' => 'Доставлен',
         ]);
+        Status::create([
+            'name' => 'Отменён',
+        ]);
     }
 }

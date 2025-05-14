@@ -18,36 +18,27 @@ class СartController
             ->get();
 
         if ($cartProducts->isEmpty()) {
-            return response()->json(['message' => 'Корзина пуста'], 404);
+            return response()->json(['message' => 'Корзина не найдена'], 404);
         }
 
-        // Группируем по product_id
-        $grouped = $cartProducts->groupBy(function ($item) {
-            return $item->productColorSize->product->id;
-        });
-
-        $products = $grouped->map(function ($group) {
-            $firstItem = $group->first();
-            $product = $firstItem->productColorSize->product;
+        $products = $cartProducts->map(function ($cartProduct) {
+            $pcs = $cartProduct->productColorSize;
 
             return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->price,
-                'photo' => $product->photo,
-                'description' => $product->description,
-                'variants' => $group->map(function ($item) {
-                    return [
-                        'color' => $item->productColorSize->color->name ?? null,
-                        'size' => $item->productColorSize->size->name ?? null,
-                        'quantity' => $item->quantity,
-                        'total' => $item->total,
-                    ];
-                })->values(),
+                'id' => $pcs->product->id,
+                'name' => $pcs->product->name,
+                'price' => $pcs->product->price,
+                'photo' => $pcs->product->photo,
+                'description' => $pcs->product->description,
+                'color' => $pcs->color->name ?? null,
+                'size' => $pcs->size->name ?? null,
+                'quantity' => $cartProduct->quantity,
             ];
-        })->values();
+        });
 
-        $totalCost = $cartProducts->sum('total');
+        $totalCost = $products->sum(function ($product) {
+            return $product['price'] * $product['quantity'];
+        });
 
         return response()->json([
             'total_cost' => $totalCost,

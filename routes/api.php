@@ -10,6 +10,8 @@ use App\Http\Controllers\ViewFilterController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PointController;
 use App\Http\Controllers\СartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -55,7 +57,8 @@ Route::patch('/cart/product/{productColorSizeId}', [СartController::class, 'upd
 Route::delete('/cart/product/{productColorSizeId}', [СartController::class, 'removeProduct'])->middleware('auth:api');
 
 // Заказы
-Route::get('/orders', [OrderController::class, 'index'])->middleware('auth:api');
-Route::get('/orders/{id}', [OrderController::class, 'show'])->middleware('auth:api');
-Route::post('/orders', [OrderController::class, 'store'])->middleware('auth:api');
-Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');
+Route::get('/order', [OrderController::class, 'index'])->middleware('auth:api');
+Route::post('/order', [OrderController::class, 'store'])->middleware('auth:api');
+Route::get('/order/{id}', [OrderController::class, 'show'])->middleware('auth:api');
+Route::patch('/order/{id}', [OrderController::class, 'update'])->middleware('auth:api');
+Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');
