@@ -51,8 +51,11 @@ Route::delete('/point/{id}', [PointController::class, 'destroy'])->middleware('a
 // Корзина
 Route::get('/cart', [СartController::class, 'show'])->middleware('auth:api');
 Route::post('/cart/product/{productColorSizeId}', [СartController::class, 'addProduct'])->middleware('auth:api');
-Route::put('/cart/product/{productId}', [СartController::class, 'updateProduct']);
-Route::delete('/cart/product/{productId}', [СartController::class, 'removeProduct']);
-Route::put('/cart', [СartController::class, 'update']);
+Route::patch('/cart/product/{productColorSizeId}', [СartController::class, 'updateProduct'])->middleware('auth:api');
+Route::delete('/cart/product/{productColorSizeId}', [СartController::class, 'removeProduct'])->middleware('auth:api');
 
-
+// Заказы
+Route::get('/orders', [OrderController::class, 'index'])->middleware('auth:api');
+Route::get('/orders/{id}', [OrderController::class, 'show'])->middleware('auth:api');
+Route::post('/orders', [OrderController::class, 'store'])->middleware('auth:api');
+Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');

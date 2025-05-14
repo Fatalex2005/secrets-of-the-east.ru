@@ -66,22 +66,21 @@ class FilterController
     public function search(Request $request)
     {
         $request->validate([
-            'q' => 'required|string|max:255',
+            'q' => 'nullable|string|max:255', // ← теперь необязательный
         ]);
 
         $search = $request->input('q');
 
-        $products = Product::with(['category', 'country'])
-            ->where('name', 'like', "%{$search}%")
-            ->orWhere('description', 'like', "%{$search}%")
-            ->get();
+        $query = Product::with(['category', 'country']);
 
-        if ($products->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ничего не найдено по запросу: ' . $search,
-            ], 404);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
+
+        $products = $query->get();
 
         return response()->json([
             'success' => true,

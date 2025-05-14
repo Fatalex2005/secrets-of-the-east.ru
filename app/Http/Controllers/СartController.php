@@ -18,57 +18,42 @@ class СartController
             ->get();
 
         if ($cartProducts->isEmpty()) {
-            return response()->json(['message' => 'Корзина не найдена'], 404);
+            return response()->json(['message' => 'Корзина пуста'], 404);
         }
 
-        $products = $cartProducts->map(function ($cartProduct) {
-            $pcs = $cartProduct->productColorSize;
+        // Группируем по product_id
+        $grouped = $cartProducts->groupBy(function ($item) {
+            return $item->productColorSize->product->id;
+        });
+
+        $products = $grouped->map(function ($group) {
+            $firstItem = $group->first();
+            $product = $firstItem->productColorSize->product;
 
             return [
-                'id' => $pcs->product->id,
-                'name' => $pcs->product->name,
-                'price' => $pcs->product->price,
-                'photo' => $pcs->product->photo,
-                'description' => $pcs->product->description,
-                'color' => $pcs->color->name ?? null,
-                'size' => $pcs->size->name ?? null,
-                'quantity' => $cartProduct->quantity,
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'photo' => $product->photo,
+                'description' => $product->description,
+                'variants' => $group->map(function ($item) {
+                    return [
+                        'color' => $item->productColorSize->color->name ?? null,
+                        'size' => $item->productColorSize->size->name ?? null,
+                        'quantity' => $item->quantity,
+                        'total' => $item->total,
+                    ];
+                })->values(),
             ];
-        });
+        })->values();
 
-        $totalCost = $products->sum(function ($product) {
-            return $product['price'] * $product['quantity'];
-        });
+        $totalCost = $cartProducts->sum('total');
 
         return response()->json([
             'total_cost' => $totalCost,
             'created_at' => $cartProducts->first()->created_at,
             'updated_at' => $cartProducts->first()->updated_at,
             'products' => $products,
-        ]);
-    }
-
-    // Обновление корзины ( обновление общей стоимости)
-    public function update(Request $request)
-    {
-        $cartProducts = $this->getUserCartProducts($request->user()->id);
-
-        // Пересчитываем общую стоимость корзины
-        $totalCost = $cartProducts->sum(function ($cartProduct) {
-            return $cartProduct->product->price * $cartProduct->quantity;
-        });
-
-        // Обновляем стоимость корзины
-        foreach ($cartProducts as $cartProduct) {
-            $cartProduct->save();
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Корзина успешно обновлена',
-            'data' => [
-                'total_cost' => $totalCost
-            ]
         ]);
     }
 
@@ -108,11 +93,11 @@ class СartController
     }
 
     // Обновление количества товара в корзине
-    public function updateProduct(Request $request, $productId)
+    public function updateProduct(Request $request, $productColorSizeId)
     {
         $clientId = $request->user()->id;
-
         $quantity = $request->input('quantity');
+
         if ($quantity < 1) {
             return response()->json([
                 'status' => 'error',
@@ -120,9 +105,9 @@ class СartController
             ], 400);
         }
 
-        // Обновляем количество товара в корзине
         $cartProduct = Cart::where('user_id', $clientId)
-            ->where('product_id', $productId)
+            ->where('product_color_size_id', $productColorSizeId)
+            ->with('productColorSize.product')
             ->first();
 
         if (!$cartProduct) {
@@ -133,13 +118,12 @@ class СartController
         }
 
         $cartProduct->quantity = $quantity;
+        $cartProduct->total = $cartProduct->productColorSize->product->price * $quantity;
         $cartProduct->save();
 
-        // Обновляем стоимость корзины
+        // Пересчёт всей корзины
         $cartProducts = $this->getUserCartProducts($clientId);
-        $totalCost = $cartProducts->sum(function ($cartProduct) {
-            return $cartProduct->product->price * $cartProduct->quantity;
-        });
+        $totalCost = $cartProducts->sum('total');
 
         return response()->json([
             'status' => 'success',
@@ -151,25 +135,23 @@ class СartController
     }
 
     // Удаление товара из корзины
-    public function removeProduct(Request $request, $productId)
+    public function removeProduct(Request $request, $productColorSizeId)
     {
         $clientId = $request->user()->id;
 
-        // Удаляем товар из корзины
         Cart::where('user_id', $clientId)
-            ->where('product_id', $productId)
+            ->where('product_color_size_id', $productColorSizeId)
             ->delete();
 
-        // Обновляем стоимость корзины
         $cartProducts = $this->getUserCartProducts($clientId);
-        $totalCost = $cartProducts->sum(function ($cartProduct) {
-            return $cartProduct->product->price * $cartProduct->quantity;
-        });
+        $totalCost = $cartProducts->sum('total');
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Товар успешно удален из корзины'
-
+            'message' => 'Товар успешно удалён из корзины',
+            'data' => [
+                'total_cost' => $totalCost
+            ]
         ]);
     }
 
