@@ -69,7 +69,7 @@ class ProductController
     // Метод для просмотра товара
     public function show($id)
     {
-        $product = Product::with(['productColorSizes.color', 'productColorSizes.size'])->find($id);
+        $product = Product::with(['category','country','productColorSizes.color', 'productColorSizes.size'])->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Товар не найден'], 404);

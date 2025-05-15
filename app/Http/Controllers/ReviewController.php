@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ApiException;
 use App\Http\Requests\ReviewsRequests\CreateReviewRequest;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Http\Request;
@@ -30,22 +31,48 @@ class ReviewController
 
         return response()->json($reviews);
     }
-    public function store(CreateReviewRequest $request, $id) {
-        if(Auth::user()->role->code != 'user'){
+    public function store(CreateReviewRequest $request, $id)
+    {
+        $user = Auth::user();
 
+        // Только обычные пользователи могут оставлять отзывы
+        if ($user->role->code != 'user') {
             return response()->json(['message' => 'Только обычные пользователи могут оставлять отзывы'], 403);
+        }
+
+        // Проверка: уже есть отзыв на этот товар от пользователя
+        $existingReview = Review::where('user_id', $user->id)
+            ->where('product_id', $id)
+            ->first();
+
+        if ($existingReview) {
+            return response()->json(['message' => 'Вы уже оставили отзыв на этот товар'], 400);
+        }
+
+        // Проверка: есть ли у пользователя заказ с этим товаром и статусом id = 4
+        $hasCompletedOrder = Order::where('user_id', $user->id)
+            ->where('status_id', 3)
+            ->whereHas('orderItems.productColorSize', function ($query) use ($id) {
+                $query->where('product_id', $id);
+            })
+            ->exists();
+
+        if (!$hasCompletedOrder) {
+            return response()->json(['message' => 'Вы можете оставить отзыв только после покупки и завершения заказа'], 403);
         }
 
         // Создаём отзыв
         $review = Review::create([
             'rating' => $request->rating,
             'description' => $request->description,
-            'user_id' => Auth::user()->id,
+            'user_id' => $user->id,
             'product_id' => $id,
         ]);
 
         return response()->json($review, 201);
     }
+
+
     public function destroy($productId, $reviewId)
     {
         $user = Auth::user();
