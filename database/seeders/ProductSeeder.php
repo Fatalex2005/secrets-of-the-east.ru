@@ -18,11 +18,23 @@ class ProductSeeder extends Seeder
             6 => 'Спортивная одежда',
         ];
 
+        $photos = [
+            'storage/products/girl1.jpg',
+            'storage/products/girl2.jpg',
+            'storage/products/girl3.jpg',
+            'storage/products/girl4.jpg',
+            'storage/products/girl5.jpg',
+            'storage/products/girl6.jpg',
+            'storage/products/girl7.jpg',
+            'storage/products/girl8.jpg',
+        ];
+
         for ($i = 1; $i <= 60; $i++) {
             $categoryId = rand(1, 6);
+            $randomPhoto = $photos[array_rand($photos)];
 
             Product::create([
-                'photo' => url('storage/products/girl1.jpg'),
+                'photo' => url($randomPhoto),
                 'name' => $categories[$categoryId] . ' ' . $i,
                 'description' => 'Описание товара',
                 'sex' => rand(0, 1),
