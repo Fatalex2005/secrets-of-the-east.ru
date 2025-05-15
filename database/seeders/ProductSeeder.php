@@ -27,6 +27,15 @@ class ProductSeeder extends Seeder
             'storage/products/girl6.jpg',
             'storage/products/girl7.jpg',
             'storage/products/girl8.jpg',
+            'storage/products/girl9.jpg',
+            'storage/products/girl10.jpg',
+            'storage/products/girl11.jpg',
+            'storage/products/girl12.jpg',
+            'storage/products/girl13.jpg',
+            'storage/products/girl14.jpg',
+            'storage/products/girl15.jpg',
+            'storage/products/girl16.jpg',
+            'storage/products/girl17.jpg',
         ];
 
         for ($i = 1; $i <= 60; $i++) {
