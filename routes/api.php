@@ -11,7 +11,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PointController;
 use App\Http\Controllers\СartController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\StripeController;
+
 
 // Регистрация пользователя
 Route::post('/register', [AuthController::class, 'register']);
@@ -62,3 +63,8 @@ Route::post('/order', [OrderController::class, 'store'])->middleware('auth:api')
 Route::get('/order/{id}', [OrderController::class, 'show'])->middleware('auth:api');
 Route::patch('/order/{id}', [OrderController::class, 'update'])->middleware('auth:api');
 Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');
+
+// Оплата
+Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
+Route::get('/payment-success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/payment-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');

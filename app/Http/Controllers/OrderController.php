@@ -8,6 +8,8 @@ use App\Models\OrderItem;
 use App\Models\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 
 class OrderController
 {
@@ -57,6 +59,7 @@ class OrderController
     }
 
     // Создание нового заказа
+    // Создание нового заказа с тестовой оплатой
     public function store(Request $request)
     {
         $clientId = $request->user()->id;
@@ -88,16 +91,32 @@ class OrderController
         });
 
         try {
-            // Создание заказа
+            // 1. Сначала создаем платеж в Stripe
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $paymentIntent = PaymentIntent::create([
+                'amount' => $totalCost * 100, // сумма в центах
+                'currency' => 'rub',
+                'payment_method_types' => ['card'],
+                'description' => 'Тестовая оплата заказа',
+                'metadata' => [
+                    'user_id' => $clientId,
+                    'test_payment' => 'true' // пометка тестового платежа
+                ],
+            ]);
+
+            // 2. Если платеж создан успешно, создаем заказ
             $order = Order::create([
                 'user_id' => $clientId,
                 'point_id' => $addressId,
                 'order_date' => now(),
                 'total' => $totalCost,
-                'status_id' => 1, // например: "Новый"
+                'status_id' => 1, // "Оплачен" (предполагая, что 2 - это статус оплаченного заказа)
+                'payment_id' => $paymentIntent->id,
+                'payment_status' => 'succeeded',
             ]);
 
-            // Создание записей для OrderItem
+            // 3. Создание записей для OrderItem
             $orderItems = $cartProducts->map(function ($item) use ($order) {
                 return [
                     'order_id' => $order->id,
@@ -109,16 +128,17 @@ class OrderController
                 ];
             });
 
-            // Массовая вставка
             OrderItem::insert($orderItems->toArray());
 
-            // Очистка корзины
+            // 4. Очистка корзины
             Cart::where('user_id', $clientId)->delete();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Заказ успешно оформлен.',
+                'message' => 'Заказ успешно оформлен и оплачен (тестовый платеж).',
                 'order_id' => $order->id,
+                'payment_id' => $paymentIntent->id,
+                'payment_status' => 'succeeded',
             ], 201);
 
         } catch (\Exception $e) {
