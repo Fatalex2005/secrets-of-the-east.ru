@@ -48,7 +48,7 @@ class AuthController
         // Создание нового токена для пользователя
         $user->api_token = Hash::make(Str::random(60));
         $user->save();
-        return response()->json(['token' => $user->api_token])->setStatusCode(200);
+        return response()->json(['token' => $user->api_token, 'user' => $user])->setStatusCode(200);
     }
     // Выход
     public function logout(Request $request) {
