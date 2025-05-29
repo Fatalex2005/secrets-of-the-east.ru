@@ -12,6 +12,7 @@ use App\Http\Controllers\PointController;
 use App\Http\Controllers\СartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\UserController;
 
 
 // Регистрация пользователя
@@ -68,3 +69,6 @@ Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->midd
 Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
 Route::get('/payment-success', [StripeController::class, 'success'])->name('stripe.success');
 Route::get('/payment-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+
+// Создание менеджера
+Route::post('/create-manager', [UserController::class, 'createManager'])->middleware('auth:api');
