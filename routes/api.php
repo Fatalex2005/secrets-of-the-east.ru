@@ -13,6 +13,8 @@ use App\Http\Controllers\СartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ColorController;
+use App\Http\Controllers\SizeController;
 
 
 // Регистрация пользователя
@@ -72,3 +74,7 @@ Route::get('/payment-cancel', [StripeController::class, 'cancel'])->name('stripe
 
 // Создание менеджера
 Route::post('/create-manager', [UserController::class, 'createManager'])->middleware('auth:api');
+
+// Цвета и размеры
+Route::get('/colors', [ColorController::class, 'index']);
+Route::get('/sizes', [SizeController::class, 'index']);
