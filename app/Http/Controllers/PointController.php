@@ -25,7 +25,6 @@ class PointController
     public function store(CreatePointRequest $request)
     {
         if(Auth::user()->role->code != 'admin'){
-
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
         $validated = $request->validated();

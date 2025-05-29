@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Exceptions\ApiException;
 use App\Http\Requests\ProductsRequests\CreateProductRequest;
 use App\Http\Requests\ProductsRequests\UpdateProductRequest;
+use App\Models\Color;
 use App\Models\Product;
 use App\Models\ProductColorSize;
+use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,50 +23,81 @@ class ProductController
         }
         return response()->json($products)->setStatusCode(200);
     }
-    // Метод для создания товара
     public function store(CreateProductRequest $request)
     {
         if(Auth::user()->role->code != 'admin'){
-
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
 
-        // Сохраняем фото товара в public папке
-        $photoPath = $request->file('photo')->store('products', 'public');
-
-        // Генерируем полный URL для фото
-        $photoUrl = url('storage/' . $photoPath);
-
-        // Считаем общее количество из цветов и размеров
-        $totalQuantity = 0;
-        foreach ($request->colors as $color) {
-            foreach ($color['sizes'] as $size) {
-                $totalQuantity += $size['quantity'];
-            }
+        // Обработка фото товара
+        $photoUrl = null;
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $photoPath = $request->file('photo')->store('products', 'public');
+            $photoUrl = url('storage/' . $photoPath);
         }
-        // Создаём товар
+
+        // Создаём товар с начальным quantity = 0
         $product = Product::create([
             'photo' => $photoUrl,
             'name' => $request->name,
             'description' => $request->description,
             'sex' => $request->sex,
-            'quantity' => $totalQuantity,
+            'quantity' => 0, // Устанавливаем начальное значение
             'price' => $request->price,
             'category_id' => $request->category_id,
             'country_id' => $request->country_id,
         ]);
-        // Заполняем таблицу product_color_size
-        foreach ($request->colors as $color) {
-            foreach ($color['sizes'] as $size) {
+
+        $totalQuantity = 0;
+
+        // Обработка цветов и размеров
+        foreach ($request->colors as $colorData) {
+            // Обработка цвета (существующий или новый)
+            if (isset($colorData['color_id'])) {
+                // Используем существующий цвет
+                $colorId = $colorData['color_id'];
+            } else {
+                // Создаем новый цвет
+                $color = Color::create([
+                    'name' => $colorData['new_color_name'],
+                    'hex' => $colorData['new_color_hex'],
+                ]);
+                $colorId = $color->id;
+            }
+
+            // Обработка размеров для текущего цвета
+            foreach ($colorData['sizes'] as $sizeData) {
+                // Обработка размера (существующий или новый)
+                if (isset($sizeData['size_id'])) {
+                    // Используем существующий размер
+                    $sizeId = $sizeData['size_id'];
+                } else {
+                    // Создаем новый размер
+                    $size = Size::create([
+                        'name' => $sizeData['new_size_name'],
+                    ]);
+                    $sizeId = $size->id;
+                }
+
+                // Создаем связь продукта с цветом и размером
                 ProductColorSize::create([
                     'product_id' => $product->id,
-                    'color_id' => $color['color_id'],
-                    'size_id' => $size['size_id'],
-                    'quantity' => $size['quantity'],
+                    'color_id' => $colorId,
+                    'size_id' => $sizeId,
+                    'quantity' => $sizeData['quantity'],
                 ]);
+
+                $totalQuantity += $sizeData['quantity'];
             }
         }
-        return response()->json($product, 201);
+
+        // Обновляем общее количество товара
+        $product->update(['quantity' => $totalQuantity]);
+
+        return response()->json([
+            'product' => $product,
+            'message' => 'Товар успешно создан с цветами и размерами'
+        ], 201);
     }
     // Метод для просмотра товара
     public function show($id)

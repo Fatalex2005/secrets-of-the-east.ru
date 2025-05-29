@@ -23,9 +23,12 @@ class CreateProductRequest extends ApiRequest
             'category_id' => 'required|integer|exists:categories,id',
             'country_id' => 'required|integer|exists:countries,id',
             'colors' => 'required|array',
-            'colors.*.color_id' => 'required|exists:colors,id',
+            'colors.*.color_id' => 'nullable|exists:colors,id',
+            'colors.*.new_color_name' => 'nullable|required_with:colors.*.new_color_hex|string|max:255',
+            'colors.*.new_color_hex' => 'nullable|required_with:colors.*.new_color_name|string|regex:/^#[a-fA-F0-9]{6}$/',
             'colors.*.sizes' => 'required|array',
-            'colors.*.sizes.*.size_id' => 'required|exists:sizes,id',
+            'colors.*.sizes.*.size_id' => 'nullable|exists:sizes,id',
+            'colors.*.sizes.*.new_size_name' => 'nullable|string|max:255',
             'colors.*.sizes.*.quantity' => 'required|integer|min:0',
         ];
     }
