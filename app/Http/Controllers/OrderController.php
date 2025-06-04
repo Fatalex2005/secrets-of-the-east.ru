@@ -19,7 +19,7 @@ class OrderController
     {
         try {
             $user = auth()->user();
-            $isAdmin = $user->role->code === 'admin';
+            $isAdmin = $user->role->code === 'admin' || $user->role->code === 'manager';
 
             // Загружаем заказы с нужными связями
             $orders = $isAdmin

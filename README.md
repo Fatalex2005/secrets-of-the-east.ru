@@ -17,14 +17,3 @@ copy .env.example .env
 ```shell
 php artisan key:generate
 ```
-5. Измените файл конфигурации .env (пример для БД MySQL)
-```php
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=secrets-of-the-east.ru
-DB_USERNAME=root
-DB_PASSWORD=
-
-SESSION_DRIVER=file
-```
