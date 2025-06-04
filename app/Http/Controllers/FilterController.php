@@ -87,6 +87,6 @@ class FilterController
             'query' => $search,
             'count' => $products->count(),
             'data' => $products,
-        ]);
+        ], 200);
     }
 }

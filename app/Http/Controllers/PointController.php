@@ -48,10 +48,8 @@ class PointController
         }
 
         $point = Point::find($id);
-
-        // Если адрес не найден или принадлежит другому пользователю — возвращаем ошибку
         if (!$point) {
-            return response()->json(['error' => 'Адрес не найден'], 403);
+            return response()->json(['error' => 'Пункт выдачи не найден'], 404);
         }
         $validated = $request->validated();
         // Обновляем данные адреса
@@ -72,7 +70,7 @@ class PointController
         $point = Point::find($id);
 
         if (!$point) {
-            return response()->json(['message' => 'Пункт выдачи не найден.'], 404);
+            return response()->json(['message' => 'Пункт выдачи не найден'], 404);
         }
 
         // Проверка на наличие связанных записей
@@ -81,7 +79,7 @@ class PointController
             // добавь сюда другие связи, если есть
         ) {
             return response()->json([
-                'message' => 'Нельзя удалить пункт выдачи, так как есть заказы на него.'
+                'message' => 'Нельзя удалить пункт выдачи, так как есть заказы, связанные с ним.'
             ], 409);
         }
 

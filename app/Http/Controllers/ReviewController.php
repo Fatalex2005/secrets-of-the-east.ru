@@ -49,7 +49,7 @@ class ReviewController
             return response()->json(['message' => 'Вы уже оставили отзыв на этот товар'], 400);
         }
 
-        // Проверка: есть ли у пользователя заказ с этим товаром и статусом id = 4
+        // Проверка: есть ли у пользователя заказ с этим товаром и статусом id = 3
         $hasCompletedOrder = Order::where('user_id', $user->id)
             ->where('status_id', 3)
             ->whereHas('orderItems.productColorSize', function ($query) use ($id) {
@@ -107,6 +107,6 @@ class ReviewController
 
         return response()->json([
             'message' => 'Отзыв успешно удален'
-        ]);
+        ], 200);
     }
 }

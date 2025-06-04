@@ -36,7 +36,41 @@ class UpdateProductRequest extends ApiRequest
             'price.min' => 'Поле "Цена" не должно быть ниже 0.',
 
             'category_id' => 'Категория должна быть выбрана',
+            'category_id.exists' => 'Выбранной категории не существует',
             'country_id' => 'Страна производителя должна быть выбрана',
+            'country_id.exists' => 'Выбранной страны не существует',
+
+            'colors.required' => 'Необходимо указать хотя бы один цвет.',
+            'colors.min' => 'Необходимо указать хотя бы один цвет.',
+            'colors.max' => 'Нельзя указать более 20 цветов.',
+
+            'colors.*.color_id.exists' => 'Выбранный цвет не существует или был удален.',
+            'colors.*.color_id.required_without_all' => 'Укажите существующий цвет или создайте новый.',
+
+            'colors.*.new_color_name.string' => 'Название нового цвета должно быть строкой.',
+            'colors.*.new_color_name.max' => 'Название нового цвета не должно превышать 100 символов.',
+            'colors.*.new_color_name.required_with' => 'Название цвета обязательно при указании HEX-кода.',
+            'colors.*.new_color_name.required_without' => 'Укажите название нового цвета или выберите существующий.',
+
+            'colors.*.new_color_hex.regex' => 'HEX-код цвета должен быть в формате #FFFFFF.',
+            'colors.*.new_color_hex.required_with' => 'HEX-код цвета обязателен при указании названия.',
+            'colors.*.new_color_hex.required_without' => 'Укажите HEX-код нового цвета или выберите существующий.',
+
+            'colors.*.sizes.required' => 'Для каждого цвета укажите хотя бы один размер.',
+            'colors.*.sizes.min' => 'Для каждого цвета укажите хотя бы один размер.',
+            'colors.*.sizes.max' => 'Для каждого цвета нельзя указать более 20 размеров.',
+
+            'colors.*.sizes.*.size_id.exists' => 'Выбранный размер не существует или был удален.',
+            'colors.*.sizes.*.size_id.required_without' => 'Укажите существующий размер или создайте новый.',
+
+            'colors.*.sizes.*.new_size_name.string' => 'Название нового размера должно быть строкой.',
+            'colors.*.sizes.*.new_size_name.max' => 'Название нового размера не должно превышать 50 символов.',
+            'colors.*.sizes.*.new_size_name.required_without' => 'Укажите название нового размера или выберите существующий.',
+
+            'colors.*.sizes.*.quantity.required' => 'Укажите количество товара для размера.',
+            'colors.*.sizes.*.quantity.integer' => 'Количество должно быть целым числом.',
+            'colors.*.sizes.*.quantity.min' => 'Количество не может быть отрицательным.',
+            'colors.*.sizes.*.quantity.max' => 'Количество не может превышать 10000.',
         ];
     }
 }

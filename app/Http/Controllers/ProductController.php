@@ -25,7 +25,7 @@ class ProductController
     }
     public function store(CreateProductRequest $request)
     {
-        if(Auth::user()->role->code != 'admin'){
+        if (Auth::user()->role->code != 'admin' && Auth::user()->role->code != 'manager'){
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
 
@@ -112,7 +112,7 @@ class ProductController
     }
     public function update(UpdateProductRequest $request, $id)
     {
-        if (Auth::user()->role->code != 'admin') {
+        if (Auth::user()->role->code != 'admin' && Auth::user()->role->code != 'manager'){
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
 
@@ -190,7 +190,7 @@ class ProductController
     }
     public function destroy($id)
     {
-        if (Auth::user()->role->code != 'admin') {
+        if (Auth::user()->role->code != 'admin' && Auth::user()->role->code != 'manager'){
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
 

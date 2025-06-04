@@ -17,46 +17,68 @@ class OrderController
     // Получение списка всех заказов пользователя
     public function index()
     {
-        $user = auth()->user();
-        $isAdmin = $user->role->code === 'admin'; // предполагается, что роль хранится в name
+        try {
+            $user = auth()->user();
+            $isAdmin = $user->role->code === 'admin';
 
-        // Загружаем заказы с нужными связями
-        $orders = $isAdmin
-            ? Order::with([
-                'user', 'point', 'status',
-                'orderItems.productColorSize.product',
-                'orderItems.productColorSize.color',
-                'orderItems.productColorSize.size'
-            ])->get()
-            : $user->orders()
-                ->with([
-                    'point', 'status',
+            // Загружаем заказы с нужными связями
+            $orders = $isAdmin
+                ? Order::with([
+                    'user', 'point', 'status',
                     'orderItems.productColorSize.product',
                     'orderItems.productColorSize.color',
                     'orderItems.productColorSize.size'
-                ])->get();
+                ])->get()
+                : $user->orders()
+                    ->with([
+                        'point', 'status',
+                        'orderItems.productColorSize.product',
+                        'orderItems.productColorSize.color',
+                        'orderItems.productColorSize.size'
+                    ])->get();
 
-        // Трансформируем заказы
-        $ordersTransformed = $orders->map(function ($order) use ($isAdmin) {
-            $totalCost = $order->orderItems->sum(function ($item) {
-                return $item->productColorSize->product->price * $item->quantity;
+            // Если заказов нет - возвращаем 404
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $isAdmin
+                        ? 'В системе пока нет заказов'
+                        : 'У вас пока нет заказов'
+                ], 404);
+            }
+
+            // Трансформируем заказы
+            $ordersTransformed = $orders->map(function ($order) use ($isAdmin) {
+                $totalCost = $order->orderItems->sum(function ($item) {
+                    return $item->productColorSize->product->price * $item->quantity;
+                });
+
+                return [
+                    'id' => $order->id,
+                    'order_date' => $order->order_date,
+                    'status' => $order->status->name ?? null,
+                    'total_cost' => $totalCost,
+                    'user' => $isAdmin ? $order->user->name : null,
+                    'address' => [
+                        'city' => $order->point->city ?? null,
+                        'street' => $order->point->street ?? null,
+                        'house' => $order->point->house ?? null,
+                    ],
+                    'items_count' => $order->orderItems->count()
+                ];
             });
 
-            return [
-                'id' => $order->id,
-                'order_date' => $order->order_date,
-                'status' => $order->status->name ?? null,
-                'total_cost' => $totalCost,
-                'user' => $isAdmin ? $order->user->name : null,
-                'address' => [
-                    'city' => $order->point->city ?? null,
-                    'street' => $order->point->street ?? null,
-                    'house' => $order->point->house ?? null,
-                ]
-            ];
-        });
+            return response()->json([
+                'status' => 'success',
+                'data' => $ordersTransformed
+            ]);
 
-        return response()->json($ordersTransformed);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Произошла ошибка при получении списка заказов'
+            ], 500);
+        }
     }
 
     // Создание нового заказа с тестовой оплатой
@@ -69,7 +91,7 @@ class OrderController
         if (!$addressId) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Не указан адрес доставки (point_id).',
+                'message' => 'Не указан адрес доставки.',
             ], 400);
         }
 
@@ -162,7 +184,7 @@ class OrderController
                 'point_id' => $addressId,
                 'order_date' => now(),
                 'total' => $session->amount_total / 100,
-                'status_id' => 2, // "Оплачен"
+                'status_id' => 2,
                 'payment_id' => $session->payment_intent,
                 'payment_status' => 'succeeded',
             ]);
@@ -260,7 +282,7 @@ class OrderController
         ]);
     }
 
-    // Обновление заказа (например, обновление адреса или статуса)
+    // Обновление заказа (статус)
     public function update(Request $request, $id)
     {
         if (Auth::user()->role->code != 'admin' && 'manager') {
