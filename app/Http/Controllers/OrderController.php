@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Stripe\Checkout\Session;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 
@@ -58,7 +59,6 @@ class OrderController
         return response()->json($ordersTransformed);
     }
 
-    // Создание нового заказа
     // Создание нового заказа с тестовой оплатой
     public function store(Request $request)
     {
@@ -91,62 +91,115 @@ class OrderController
         });
 
         try {
-            // 1. Сначала создаем платеж в Stripe
             Stripe::setApiKey(env('STRIPE_SECRET'));
 
-            $paymentIntent = PaymentIntent::create([
-                'amount' => $totalCost * 100, // сумма в центах
-                'currency' => 'rub',
+            // 1. Создаем сессию оплаты Stripe Checkout
+            $session = Session::create([
                 'payment_method_types' => ['card'],
-                'description' => 'Тестовая оплата заказа',
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'rub',
+                        'product_data' => [
+                            'name' => 'Заказ от ' . $request->user()->name,
+                        ],
+                        'unit_amount' => $totalCost * 100,
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('checkout.cancel'),
                 'metadata' => [
                     'user_id' => $clientId,
-                    'test_payment' => 'true' // пометка тестового платежа
+                    'address_id' => $addressId,
+                    // Передаем только необходимые минимальные данные
+                    'cart_summary' => json_encode([
+                        'items_count' => $cartProducts->count(),
+                        'total' => $totalCost
+                    ])
                 ],
             ]);
 
-            // 2. Если платеж создан успешно, создаем заказ
+            // 2. Возвращаем URL для перенаправления на страницу оплаты Stripe
+            return response()->json([
+                'status' => 'payment_required',
+                'message' => 'Требуется подтверждение оплаты',
+                'payment_url' => $session->url,
+                'session_id' => $session->id
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ошибка при создании сессии оплаты: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function handleSuccess(Request $request)
+    {
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+            $sessionId = $request->get('session_id');
+            $session = Session::retrieve($sessionId);
+
+            // Получаем данные из metadata
+            $clientId = $session->metadata->user_id;
+            $addressId = $session->metadata->address_id;
+
+            // 1. Получаем корзину пользователя из базы данных
+            $cartProducts = Cart::where('user_id', $clientId)
+                ->with('productColorSize.product')
+                ->get();
+
+            if ($cartProducts->isEmpty()) {
+                throw new \Exception('Корзина пуста или уже обработана');
+            }
+
+            // 2. Создаем заказ
             $order = Order::create([
                 'user_id' => $clientId,
                 'point_id' => $addressId,
                 'order_date' => now(),
-                'total' => $totalCost,
-                'status_id' => 1, // "Оплачен" (предполагая, что 2 - это статус оплаченного заказа)
-                'payment_id' => $paymentIntent->id,
+                'total' => $session->amount_total / 100,
+                'status_id' => 2, // "Оплачен"
+                'payment_id' => $session->payment_intent,
                 'payment_status' => 'succeeded',
             ]);
 
-            // 3. Создание записей для OrderItem
-            $orderItems = $cartProducts->map(function ($item) use ($order) {
-                return [
+            // 3. Добавляем товары в заказ
+            foreach ($cartProducts as $item) {
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_color_size_id' => $item->product_color_size_id,
                     'quantity' => $item->quantity,
                     'total' => $item->productColorSize->product->price * $item->quantity,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            });
+                ]);
+            }
 
-            OrderItem::insert($orderItems->toArray());
-
-            // 4. Очистка корзины
+            // 4. Очищаем корзину
             Cart::where('user_id', $clientId)->delete();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Заказ успешно оформлен и оплачен (тестовый платеж).',
+                'message' => 'Заказ успешно оформлен и оплачен',
                 'order_id' => $order->id,
-                'payment_id' => $paymentIntent->id,
-                'payment_status' => 'succeeded',
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ошибка при создании заказа: ' . $e->getMessage(),
+                'message' => 'Ошибка при обработке платежа: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function handleCancel(Request $request)
+    {
+        return response()->json([
+            'status' => 'canceled',
+            'message' => 'Оплата отменена',
+        ], 200);
     }
 
     public function show($id)

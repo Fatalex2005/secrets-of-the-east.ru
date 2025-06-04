@@ -11,7 +11,6 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PointController;
 use App\Http\Controllers\СartController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\SizeController;
@@ -25,52 +24,49 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 // Товары
-Route::get('/product', [ProductController::class, 'index']);
-Route::post('/product', [ProductController::class, 'store'])->middleware('auth:api');
-Route::get('/product/{id}', [ProductController::class, 'show']);
-Route::patch('/product/{id}', [ProductController::class, 'update'])->middleware('auth:api');
-Route::delete('/product/{id}', [ProductController::class, 'destroy'])->middleware('auth:api');
+Route::get('/product', [ProductController::class, 'index']);   // Просмотр всех товаров
+Route::post('/product', [ProductController::class, 'store'])->middleware('auth:api');   // Создание товара
+Route::get('/product/{id}', [ProductController::class, 'show']);   // Просмотр конкретного товара
+Route::patch('/product/{id}', [ProductController::class, 'update'])->middleware('auth:api');   // Обновление товара
+Route::delete('/product/{id}', [ProductController::class, 'destroy'])->middleware('auth:api');   // Удаление товара
 
 // Профиль
-Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api');
-Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth:api');
+Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api');   // Просмотр профиля
+Route::patch('/profile', [ProfileController::class, 'update'])->middleware('auth:api');   // Обновление своего профиля
 
 // Товары по фильтрам
-Route::get('/products/filter', [FilterController::class, 'filterProducts']);
-Route::get('/products/search', [FilterController::class, 'search']);
+Route::get('/products/filter', [FilterController::class, 'filterProducts']);   // Фильтр по категории, стране, цене и полу
+Route::get('/products/search', [FilterController::class, 'search']);   // Поиск по тексту
 
 // Вывод категорий и стран
 Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
 Route::get('/category', [ViewFilterController::class, 'allCategoryIndex']);
 
 // Отзывы
-Route::get('/product/{id}/review', [ReviewController::class, 'index']);
-Route::post('/product/{id}/review', [ReviewController::class, 'store'])->middleware('auth:api');
-Route::delete('/product/{productId}/review/{reviewId}', [ReviewController::class, 'destroy'])->middleware('auth:api');
+Route::get('/product/{id}/review', [ReviewController::class, 'index']);   // Просмотр отзывов по товару
+Route::post('/product/{id}/review', [ReviewController::class, 'store'])->middleware('auth:api');   // Создание отзыва
+Route::delete('/product/{productId}/review/{reviewId}', [ReviewController::class, 'destroy'])->middleware('auth:api');   // Удаление отзыва
 
 // Пункты выдачи
-Route::get('/point', [PointController::class, 'index']);
-Route::post('/point', [PointController::class, 'store'])->middleware('auth:api');
-Route::patch('/point/{id}', [PointController::class, 'update'])->middleware('auth:api');
-Route::delete('/point/{id}', [PointController::class, 'destroy'])->middleware('auth:api');
+Route::get('/point', [PointController::class, 'index']);   // Просмотр всех пунктов выдачи
+Route::post('/point', [PointController::class, 'store'])->middleware('auth:api');   // Создание пункта выдачи
+Route::patch('/point/{id}', [PointController::class, 'update'])->middleware('auth:api');   // Редактирование пункта выдачи
+Route::delete('/point/{id}', [PointController::class, 'destroy'])->middleware('auth:api');   // Удаление пункта выдачи
 
 // Корзина
-Route::get('/cart', [СartController::class, 'show'])->middleware('auth:api');
-Route::post('/cart/product/{productColorSizeId}', [СartController::class, 'addProduct'])->middleware('auth:api');
-Route::patch('/cart/product/{productColorSizeId}', [СartController::class, 'updateProduct'])->middleware('auth:api');
-Route::delete('/cart/product/{productColorSizeId}', [СartController::class, 'removeProduct'])->middleware('auth:api');
+Route::get('/cart', [СartController::class, 'show'])->middleware('auth:api');   // Просмотр товаров всех товаров в своей корзине
+Route::post('/cart/product/{productColorSizeId}', [СartController::class, 'addProduct'])->middleware('auth:api');   // Добаление товара в корзину
+Route::patch('/cart/product/{productColorSizeId}', [СartController::class, 'updateProduct'])->middleware('auth:api');   // Обновление количества товара в корзине
+Route::delete('/cart/product/{productColorSizeId}', [СartController::class, 'removeProduct'])->middleware('auth:api');   // Удаление товара из корзины
 
 // Заказы
-Route::get('/order', [OrderController::class, 'index'])->middleware('auth:api');
-Route::post('/order', [OrderController::class, 'store'])->middleware('auth:api');
-Route::get('/order/{id}', [OrderController::class, 'show'])->middleware('auth:api');
-Route::patch('/order/{id}', [OrderController::class, 'update'])->middleware('auth:api');
-Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');
-
-// Оплата
-Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
-Route::get('/payment-success', [StripeController::class, 'success'])->name('stripe.success');
-Route::get('/payment-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+Route::get('/order', [OrderController::class, 'index'])->middleware('auth:api');   // Просмотр всех заказов или только своих (в зависимости от роли)
+Route::post('/order', [OrderController::class, 'store'])->middleware('auth:api');   // Создание заказа
+Route::get('/order/{id}', [OrderController::class, 'show'])->middleware('auth:api');   // Просмотр конкретного заказа
+Route::patch('/order/{id}', [OrderController::class, 'update'])->middleware('auth:api');   // Обновление статуса заказа
+Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->middleware('auth:api');   // Отмена заказа
+Route::get('/checkout/success', [OrderController::class, 'handleSuccess'])->name('checkout.success');   // Оплачено
+Route::get('/checkout/cancel', [OrderController::class, 'handleCancel'])->name('checkout.cancel');   // Отменён
 
 // Создание менеджера
 Route::post('/create-manager', [UserController::class, 'createManager'])->middleware('auth:api');
