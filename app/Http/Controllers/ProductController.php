@@ -121,22 +121,58 @@ class ProductController
             return response()->json(['message' => 'Товар не найден'], 404);
         }
 
-        // Если есть новое фото — сохраняем
-        if ($request->hasFile('photo')) {
+        // Обработка фото товара (как в store)
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $photoPath = $request->file('photo')->store('products', 'public');
             $photoUrl = url('storage/' . $photoPath);
             $product->photo = $photoUrl;
         }
 
-        // Считаем новое количество
         $totalQuantity = 0;
-        foreach ($request->colors as $color) {
-            foreach ($color['sizes'] as $size) {
-                $totalQuantity += $size['quantity'];
+
+        // Удаляем старые связи (как было)
+        $product->productColorSizes()->delete();
+
+        // Обработка цветов и размеров (аналогично store)
+        foreach ($request->colors as $colorData) {
+            // Обработка цвета (существующий или новый)
+            if (isset($colorData['color_id'])) {
+                $colorId = $colorData['color_id'];
+            } else {
+                // Создаем новый цвет (как в store)
+                $color = Color::create([
+                    'name' => $colorData['new_color_name'],
+                    'hex' => $colorData['new_color_hex'],
+                ]);
+                $colorId = $color->id;
+            }
+
+            // Обработка размеров для текущего цвета
+            foreach ($colorData['sizes'] as $sizeData) {
+                // Обработка размера (существующий или новый)
+                if (isset($sizeData['size_id'])) {
+                    $sizeId = $sizeData['size_id'];
+                } else {
+                    // Создаем новый размер (как в store)
+                    $size = Size::create([
+                        'name' => $sizeData['new_size_name'],
+                    ]);
+                    $sizeId = $size->id;
+                }
+
+                // Создаем связь продукта с цветом и размером
+                ProductColorSize::create([
+                    'product_id' => $product->id,
+                    'color_id' => $colorId,
+                    'size_id' => $sizeId,
+                    'quantity' => $sizeData['quantity'],
+                ]);
+
+                $totalQuantity += $sizeData['quantity'];
             }
         }
 
-        // Обновляем данные товара
+        // Обновляем данные товара (как в store)
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -147,21 +183,10 @@ class ProductController
             'quantity' => $totalQuantity,
         ]);
 
-        // Удаляем старые размеры и цвета
-        $product->productColorSizes()->delete();
-
-        // Добавляем новые
-        foreach ($request->colors as $color) {
-            foreach ($color['sizes'] as $size) {
-                $product->productColorSizes()->create([
-                    'color_id' => $color['color_id'],
-                    'size_id' => $size['size_id'],
-                    'quantity' => $size['quantity'],
-                ]);
-            }
-        }
-
-        return response()->json($product->load(['productColorSizes.color', 'productColorSizes.size']), 200);
+        return response()->json([
+            'product' => $product->load(['productColorSizes.color', 'productColorSizes.size']),
+            'message' => 'Товар успешно обновлен'
+        ], 200);
     }
     public function destroy($id)
     {
