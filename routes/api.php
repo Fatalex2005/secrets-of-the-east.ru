@@ -14,6 +14,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\SizeController;
+use App\Http\Controllers\CategoryController;
 
 
 // Регистрация пользователя
@@ -41,6 +42,9 @@ Route::get('/products/search', [FilterController::class, 'search']);   // Пои
 // Вывод категорий и стран
 Route::get('/country', [ViewFilterController::class, 'allCountryIndex']);
 Route::get('/category', [ViewFilterController::class, 'allCategoryIndex']);
+
+// Создание категории
+Route::post('/category', [CategoryController::class, 'store'])->middleware('auth:api');
 
 // Отзывы
 Route::get('/product/{id}/review', [ReviewController::class, 'index']);   // Просмотр отзывов по товару
