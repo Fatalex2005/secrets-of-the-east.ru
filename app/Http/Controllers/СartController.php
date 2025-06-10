@@ -25,6 +25,7 @@ class СartController
             $pcs = $cartProduct->productColorSize;
 
             return [
+                'product_color_size_id' => $pcs->id,
                 'id' => $pcs->product->id,
                 'name' => $pcs->product->name,
                 'price' => $pcs->product->price,
