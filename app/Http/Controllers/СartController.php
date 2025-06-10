@@ -130,19 +130,6 @@ class СartController
     }
 
     // Удаление товара из корзины
-    /**
-     * Удаление товара из корзины
-     *
-     * @param Request $request
-     * @param int $productColorSizeId
-     * @return \Illuminate\Http\JsonResponse
-     *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     * @response 404 {
-     *   "status": "error",
-     *   "message": "Указанный товар не найден в вашей корзине"
-     * }
-     */
     public function removeProduct(Request $request, $productColorSizeId)
     {
         $clientId = $request->user()->id;
