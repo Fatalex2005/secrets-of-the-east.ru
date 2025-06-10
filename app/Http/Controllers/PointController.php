@@ -59,7 +59,6 @@ class PointController
         return response()->json($point);
     }
 
-
     // Удаление адреса по id
     public function destroy($id)
     {
@@ -87,5 +86,4 @@ class PointController
 
         return response()->json(['message' => 'Пункт выдачи удалён.'], 200);
     }
-
 }

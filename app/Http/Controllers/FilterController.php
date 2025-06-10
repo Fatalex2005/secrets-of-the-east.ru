@@ -66,7 +66,7 @@ class FilterController
     public function search(Request $request)
     {
         $request->validate([
-            'q' => 'nullable|string|max:255', // ← теперь необязательный
+            'q' => 'nullable|string|max:255',
         ]);
 
         $search = $request->input('q');

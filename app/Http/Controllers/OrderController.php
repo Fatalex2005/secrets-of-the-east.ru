@@ -201,12 +201,7 @@ class OrderController
 
             // 4. Очищаем корзину
             Cart::where('user_id', $clientId)->delete();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Заказ успешно оформлен и оплачен',
-                'order_id' => $order->id,
-            ], 201);
+            return redirect()->away(config('app.frontend_url') . '/cart?success=true');
 
         } catch (\Exception $e) {
             return response()->json([
@@ -227,7 +222,7 @@ class OrderController
     public function show($id)
     {
         $user = auth()->user();
-        $isAdmin = $user->role->code === 'admin';
+        $isAdmin = $user->role->code === 'admin' || $user->role->code === 'manager';
 
         // Загружаем заказ с вложенными связями
         $order = Order::with([
