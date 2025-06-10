@@ -213,10 +213,7 @@ class OrderController
 
     public function handleCancel(Request $request)
     {
-        return response()->json([
-            'status' => 'canceled',
-            'message' => 'Оплата отменена',
-        ], 200);
+        return redirect()->away(config('app.frontend_url') . '/cart?success=false');
     }
 
     public function show($id)
