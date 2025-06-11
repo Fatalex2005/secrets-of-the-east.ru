@@ -40,7 +40,6 @@ class OrderController
             // Если заказов нет - возвращаем 404
             if ($orders->isEmpty()) {
                 return response()->json([
-                    'status' => 'error',
                     'message' => $isAdmin
                         ? 'В системе пока нет заказов'
                         : 'У вас пока нет заказов'

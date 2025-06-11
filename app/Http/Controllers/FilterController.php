@@ -82,6 +82,13 @@ class FilterController
 
         $products = $query->get();
 
+        // Проверяем, найдены ли товары
+        if ($products->isEmpty()) {
+            return response()->json([
+                'message' => 'Товары по вашему запросу не найдены',
+            ], 404);
+        }
+
         return response()->json([
             'success' => true,
             'query' => $search,

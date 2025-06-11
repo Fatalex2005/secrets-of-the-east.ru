@@ -52,11 +52,18 @@ class AuthController
     }
     // Выход
     public function logout(Request $request) {
+        // Проверка авторизации пользователя
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Пользователь не авторизован'], 401);
+        }
+
         // Получение текущего пользователя
         $user = Auth::user();
-        // Создание нового токена для пользователя
+
+        // Удаление токена пользователя
         $user->api_token = null;
         $user->save();
-        return response()->json(['message' => 'Вы вышли из системы'])->setStatusCode(200);
+
+        return response()->json(['message' => 'Вы вышли из системы'], 200);
     }
 }

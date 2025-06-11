@@ -14,6 +14,9 @@ class UserController
 {
     public function createManager(RegisterRequest $request)
     {
+        if (Auth::user()->role->code != 'admin') {
+            return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
+        }
         // Извлекаем role_id для роли 'Менеджер' (предполагаем, что у менеджера code = 'manager')
         $role_id = Role::where('code', 'manager')->first()->id;
 

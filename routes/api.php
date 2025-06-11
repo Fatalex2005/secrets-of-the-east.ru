@@ -73,6 +73,7 @@ Route::patch('/order/cancelled/{id}', [OrderController::class, 'destroy'])->midd
 Route::get('/checkout/success', [OrderController::class, 'handleSuccess'])->name('checkout.success');   // Оплачено
 Route::get('/checkout/cancel', [OrderController::class, 'handleCancel'])->name('checkout.cancel');   // Отменён
 
+// Менеджеры
 Route::post('/manager', [UserController::class, 'createManager'])->middleware('auth:api');   // Создание менеджера
 Route::delete('/manager/{id}', [UserController::class, 'deleteManager'])->middleware('auth:api');   // Удаление менеджера
 Route::get('/manager', [UserController::class, 'listManagers'])->middleware('auth:api');   // Список менеджеров
@@ -86,4 +87,5 @@ Route::patch('/user/{id}', [UserController::class, 'update'])->middleware('auth:
 Route::get('/colors', [ColorController::class, 'index']);
 Route::get('/sizes', [SizeController::class, 'index']);
 
+// Статусы
 Route::get('/statuses', [StatusController::class, 'index']);

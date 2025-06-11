@@ -80,7 +80,6 @@ class СartController
             ]);
         }
 
-
         return response()->json([
             'status' => 'success',
             'message' => 'Товар добавлен в корзину',
