@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\SizeController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\StatusController;
 
 
 // Регистрация пользователя
@@ -84,3 +85,5 @@ Route::patch('/user/{id}', [UserController::class, 'update'])->middleware('auth:
 // Цвета и размеры
 Route::get('/colors', [ColorController::class, 'index']);
 Route::get('/sizes', [SizeController::class, 'index']);
+
+Route::get('/statuses', [StatusController::class, 'index']);
