@@ -112,16 +112,18 @@ class ProductController
     }
     public function update(UpdateProductRequest $request, $id)
     {
-        if (Auth::user()->role->code != 'admin' && Auth::user()->role->code != 'manager'){
+        // Проверка прав доступа
+        if (Auth::user()->role->code != 'admin' && Auth::user()->role->code != 'manager') {
             return response()->json(['message' => 'У вас нет прав на выполнение этого действия'], 403);
         }
 
-        $product = Product::find($id);
+        // Поиск товара с его вариантами
+        $product = Product::with(['productColorSizes.carts', 'productColorSizes.orderItems'])->find($id);
         if (!$product) {
             return response()->json(['message' => 'Товар не найден'], 404);
         }
 
-        // Обработка фото товара (как в store)
+        // Обработка основного фото
         if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $photoPath = $request->file('photo')->store('products', 'public');
             $photoUrl = url('storage/' . $photoPath);
@@ -129,50 +131,44 @@ class ProductController
         }
 
         $totalQuantity = 0;
+        $usedPcsIds = [];
 
-        // Удаляем старые связи (как было)
-        $product->productColorSizes()->delete();
-
-        // Обработка цветов и размеров (аналогично store)
+        // Обработка цветов и размеров
         foreach ($request->colors as $colorData) {
-            // Обработка цвета (существующий или новый)
-            if (isset($colorData['color_id'])) {
-                $colorId = $colorData['color_id'];
-            } else {
-                // Создаем новый цвет (как в store)
-                $color = Color::create([
-                    'name' => $colorData['new_color_name'],
-                    'hex' => $colorData['new_color_hex'],
-                ]);
-                $colorId = $color->id;
-            }
+            $colorId = $this->getOrCreateColor($colorData);
 
-            // Обработка размеров для текущего цвета
             foreach ($colorData['sizes'] as $sizeData) {
-                // Обработка размера (существующий или новый)
-                if (isset($sizeData['size_id'])) {
-                    $sizeId = $sizeData['size_id'];
-                } else {
-                    // Создаем новый размер (как в store)
-                    $size = Size::create([
-                        'name' => $sizeData['new_size_name'],
-                    ]);
-                    $sizeId = $size->id;
-                }
+                $sizeId = $this->getOrCreateSize($sizeData);
 
-                // Создаем связь продукта с цветом и размером
-                ProductColorSize::create([
+                // Ищем или создаем связь товара с цветом и размером
+                $pcs = ProductColorSize::firstOrNew([
                     'product_id' => $product->id,
                     'color_id' => $colorId,
                     'size_id' => $sizeId,
-                    'quantity' => $sizeData['quantity'],
                 ]);
 
+                $pcs->quantity = $sizeData['quantity'];
+                $pcs->save();
+                $usedPcsIds[] = $pcs->id;
                 $totalQuantity += $sizeData['quantity'];
             }
         }
 
-        // Обновляем данные товара (как в store)
+        // Удаляем только те варианты, которых:
+        // 1. Нет в новом запросе
+        // 2. Нет в корзинах
+        // 3. Нет в заказах
+        $toDelete = $product->productColorSizes()
+            ->whereNotIn('id', $usedPcsIds)
+            ->whereDoesntHave('carts')
+            ->whereDoesntHave('orderItems')
+            ->get();
+
+        foreach ($toDelete as $pcs) {
+            $pcs->delete();
+        }
+
+        // Обновляем основные данные товара
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -184,9 +180,35 @@ class ProductController
         ]);
 
         return response()->json([
-            'product' => $product->load(['productColorSizes.color', 'productColorSizes.size']),
-            'message' => 'Товар успешно обновлен'
+            'product' => $product->fresh()->load(['productColorSizes.color', 'productColorSizes.size']),
+            'message' => 'Товар успешно обновлен',
+            'warning' => $toDelete->count() < count($product->productColorSizes) - count($usedPcsIds)
+                ? 'Некоторые варианты не были удалены, так как они используются в заказах или корзинах'
+                : null
         ], 200);
+    }
+
+    protected function getOrCreateColor($colorData)
+    {
+        if (isset($colorData['color_id'])) {
+            return $colorData['color_id'];
+        }
+
+        return Color::create([
+            'name' => $colorData['new_color_name'],
+            'hex' => $colorData['new_color_hex'],
+        ])->id;
+    }
+
+    protected function getOrCreateSize($sizeData)
+    {
+        if (isset($sizeData['size_id'])) {
+            return $sizeData['size_id'];
+        }
+
+        return Size::create([
+            'name' => $sizeData['new_size_name'],
+        ])->id;
     }
     public function destroy($id)
     {
