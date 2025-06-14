@@ -52,11 +52,6 @@ class AuthController
     }
     // Выход
     public function logout(Request $request) {
-        // Проверка авторизации пользователя
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Пользователь не авторизован'], 401);
-        }
-
         // Получение текущего пользователя
         $user = Auth::user();
 

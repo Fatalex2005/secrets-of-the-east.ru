@@ -92,16 +92,6 @@ class ReviewController
             throw new ApiException('Этот отзыв не принадлежит указанному товару', 400);
         }
 
-        // Проверка прав доступа
-        $isAdminOrManager = in_array($user->role->code, ['admin', 'manager']);
-        $isReviewAuthor = $review->user_id == $user->id;
-
-        if (!$isAdminOrManager && !$isReviewAuthor) {
-            return response()->json([
-                'message' => 'Недостаточно прав для удаления отзыва'
-            ], 403);
-        }
-
         // Удаление отзыва
         $review->delete();
 
